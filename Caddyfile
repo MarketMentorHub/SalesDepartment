@@ -1,0 +1,14 @@
+# Caddy holt sich automatisch ein TLS-Zertifikat für die Subdomain
+# und proxyt auf den Next.js-Container. Voraussetzung: DNS-A-Record
+# sales.mmh.capital -> Server-IP ist gesetzt.
+
+sales.mmh.capital {
+	encode zstd gzip
+
+	# Uploads können groß sein (Audio) — Request-Body-Limit hochsetzen.
+	request_body {
+		max_size 200MB
+	}
+
+	reverse_proxy app:3000
+}

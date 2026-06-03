@@ -1,0 +1,89 @@
+// MMH Sales Department — Datenmodell
+// Siehe KONZEPT.md für die fachliche Begründung.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Woher der Call ins System kam.
+enum Quelle {
+  UPLOAD // manueller Browser-Upload
+  N8N // generisch über die Ingest-API
+  AIRCALL // Erstgespräch/Kaltakquise per Telefon (Aircall)
+  FATHOM // Closing Call, via Fathom aufgezeichnet
+  ZOOM // optional: direkt aus Zoom
+}
+
+// Gesprächstyp — damit wir später je Typ eigene Scorecards fahren können.
+enum Gespraechstyp {
+  ERSTGESPRAECH // kostenloses Erstgespräch / Kaltakquise
+  CLOSING // Closing Call
+}
+
+// Verarbeitungsstand eines Calls.
+enum Status {
+  NEU
+  TRANSKRIBIERT
+  ANALYSIERT
+  FEHLER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  calls        Call[]
+  createdAt    DateTime @default(now())
+}
+
+model Call {
+  id            String        @id @default(cuid())
+  owner         User          @relation(fields: [ownerId], references: [id])
+  ownerId       String
+  titel         String
+  kunde         String?
+  quelle        Quelle        @default(UPLOAD)
+  gespraechstyp Gespraechstyp @default(ERSTGESPRAECH)
+  status        Status        @default(NEU)
+  transkript    String?
+  audioPfad     String?
+  dauerSek      Int?
+  gesprochenAm  DateTime?
+  fehler        String?
+  analyse       Analyse?
+  createdAt     DateTime      @default(now())
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+model Analyse {
+  id               String   @id @default(cuid())
+  call             Call     @relation(fields: [callId], references: [id], onDelete: Cascade)
+  callId           String   @unique
+  frameworkVersion String
+  // Scorecard je Kriterium: [{ kriterium, score, begruendung, tipp }]
+  scorecard        Json
+  zusammenfassung  String
+  talkRatio        Float?
+  einwaende        Json // [{ einwand, reaktion, bewertung }]
+  nextSteps        Json // string[]
+  redFlags         Json // string[]
+  staerken         Json // string[]
+  schwaechen       Json // string[]
+  gesamtScore      Float?
+  modell           String
+  createdAt        DateTime @default(now())
+}

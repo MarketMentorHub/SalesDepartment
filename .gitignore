@@ -1,0 +1,28 @@
+# Dependencies
+/node_modules
+
+# Next.js
+/.next
+/out
+next-env.d.ts
+
+# Production
+/build
+
+# Prisma
+/prisma/*.db
+
+# Uploads (lokal abgelegte Call-Aufnahmen)
+/uploads
+
+# Env-Dateien mit Secrets
+.env
+.env*.local
+
+# Logs & OS
+*.log
+.DS_Store
+
+# Editor
+.vscode
+.idea

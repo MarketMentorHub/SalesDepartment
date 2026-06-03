@@ -40,7 +40,17 @@ Login per Web. Jeder eigener Account mit Rolle (`user` / `admin`).
 
 ## 3. Call-Input
 
-Beide Wege werden unterstützt:
+### Die zwei Call-Typen (real)
+- **Erstgespräch / Kaltakquise** — Telefonat, geführt über **Aircall**; Transkript
+  dort abrufbar. → `gespraechstyp = ERSTGESPRAECH`, `quelle = AIRCALL`
+- **Closing Call** — Zoom-Session, aufgezeichnet über **Fathom**; Transkript dort
+  abrufbar (Zoom direkt wäre auch möglich). → `gespraechstyp = CLOSING`, `quelle = FATHOM`
+
+Beide liefern fertige Transkripte → die n8n-Pipeline schiebt sie per Ingest-API rein.
+Das Feld `gespraechstyp` ist im Datenmodell vorgesehen, damit wir später je Typ
+unterschiedliche Scorecards fahren können.
+
+### Beide Wege werden unterstützt:
 1. **Manueller Upload** im Browser (Audio/Video oder fertiges Transkript).
 2. **Automatisch via n8n** über die Ingest-API.
 
@@ -129,7 +139,10 @@ asynchron. Der Call erscheint mit `status` in der Liste und aktualisiert sich.
 
 ## 10. Offene Punkte / später zu klären
 
-- Welches Aufnahme-Tool nutzt ihr (Zoom / Fathom / tl;dv)? → ggf. direkte Quelle
-  statt Umweg über n8n. (An dieser Umgebung hängt bereits ein Meeting-Recording-Tool.)
-- Echte Scorecard-Kriterien von Emilio (ersetzen die Defaults).
+- **Aircall-/Fathom-Anbindung in n8n** konkret verdrahten (Trigger → Transkript
+  abrufen → POST an die Ingest-API).
+- **`audio_url`-Download** im Tool umsetzen (aktuell muss n8n das Transkript
+  mitliefern; Aircall & Fathom liefern es ohnehin).
+- Echte Scorecard-Kriterien von Emilio (ersetzen die Defaults in `src/lib/scorecard.ts`).
+- Ggf. eigene Scorecard je Gesprächstyp (Erstgespräch vs. Closing).
 - KPIs / Dashboard-Inhalte (Phase 2).
